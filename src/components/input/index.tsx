@@ -1,17 +1,18 @@
 import React, {useCallback, useState, useEffect , InputHTMLAttributes, useRef } from 'react';
 import { IconBaseProps } from 'react-icons/lib';
 import { FiAlertCircle } from 'react-icons/fi';
-import { Field, Error } from './styles';
+import { Field } from './styles';
 import { useField } from '@unform/core';
 import Tooltip from '../tooltip/index';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> { 
     name: string;
-    icon: React.ComponentType<IconBaseProps>;
+    containerStyle?: object;
+    icon?: React.ComponentType<IconBaseProps>;
 }
 
 
-const Input: React.FC<InputProps> = ({name, icon: Icon, ...rest}) => {
+const Input: React.FC<InputProps> = ({name, containerStyle = {}, icon: Icon, ...rest}) => {
 
     const [isFocused, setisFocused] = useState(false);
     const [isFilled, setisFilled] = useState(false);
@@ -38,9 +39,15 @@ const Input: React.FC<InputProps> = ({name, icon: Icon, ...rest}) => {
     ,[fieldName, registerField]);
 
     return (    
-        <Field isErrored={!!error} isFocused={isFocused} isFilled={isFilled}>
+        <Field 
+        isErrored={!!error} 
+        isFocused={isFocused} 
+        isFilled={isFilled}
+        data-testid="inputContainer">
+
             { Icon && <Icon size={20}/>}
             <input
+            style={containerStyle}
             onBlur={handleBlur}
             onFocus={()=>setisFocused(true)}
             defaultValue={defaultValue} 

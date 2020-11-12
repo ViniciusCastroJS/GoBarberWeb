@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useContext} from 'react';
+import React, {useCallback, useRef, useContext, useState} from 'react';
 import { Content, Container, AnimationContainer, Background} from './styles';
 import LogoImg from '../../assets/Logo.svg';
 import { FiMail, FiLock, FiLogIn } from "react-icons/fi";
@@ -8,39 +8,41 @@ import { Form } from '@unform/web'
 import { FormHandles } from '@unform/core'
 import * as Yup from 'yup';
 import getValidationError from '../../utils/GetValidationError';
-import {useAuth} from '../../hooks/auth'
 import {useToast} from '../../hooks/Toast'
 import { Link, useHistory } from 'react-router-dom'
+import api from '../../services/api';
 
-interface SignInFormData{
+interface ForgotPasswordData{
     email: string;
     password: string;
 }
 
-const SignIn = () => {
+const ForgotPassword = () => {
     const Formref = useRef<FormHandles>(null);
-
-    const { signIn } = useAuth();
     const { addToast } = useToast();
-    const history = useHistory();
+    const [loading, setLoading] = useState(false);
 
-    const HandleSubmit = useCallback( async(data: SignInFormData) => {
+    const HandleSubmit = useCallback( async(data: ForgotPasswordData) => {
         try {
+            setLoading(true);
+
             const Schema = Yup.object().shape({
                 email: Yup.string().required("E-mail Obrigatório").email("Digite um e-mail válido"),
-                password: Yup.string().required(" Senha Obrigatória")   
             })
 
             await Schema.validate(data, {
                 abortEarly: false
             });
 
-            await signIn({
-                email: data.email,
-                password: data.password
+            await api.post('/password/forgot', {
+                email: data.email
             });
 
-            history.push('/dashboard');
+            addToast({
+                type: 'success',
+                title: 'Requisição feita com sucesso!',
+                description: 'Foi enviando por e-mail sua recuperação de senha'
+            });
 
         } catch (error) {
             if(error instanceof Yup.ValidationError)
@@ -54,11 +56,13 @@ const SignIn = () => {
 
             addToast({
                 type: 'danger',
-                title: 'Erro na autenticação',
+                title: 'Erro na recuperação de senha',
                 description: 'Cheque as credenciais'
             });
+        } finally{
+            setLoading(false);
         }
-    }, [signIn, addToast, history])
+    }, [addToast])
     
     return (
         <Container>
@@ -67,18 +71,14 @@ const SignIn = () => {
                     <img src={LogoImg} alt="Go Barber Logo"/>
 
                     <Form ref={Formref} onSubmit={HandleSubmit}>
-                        <h1> Faça seu Log On</h1>
-                        <Input icon={FiMail} name="email" placeholder="e-mail"/>
-                        <Input icon={FiLock} name="password" type="password" placeholder="Password"/>
-                        <Btn name="BtnSubmit" type="submit">Entrar</Btn>
-
-                        <Link to="/forgotpassword">Esqueci minha senha</Link>
-
+                        <h1> Recuperação de senha </h1>
+                        <Input icon={FiMail} name="email" placeholder="E-mail"/>
+                        <Btn loading={loading} name="BtnSubmit" type="submit">Enviar</Btn>
                     </Form>
             
-                    <Link to="/signup">
+                    <Link to="/signin">
                         <FiLogIn/>
-                        Criar Conta
+                        Voltar ao Login
                     </Link>
                 </AnimationContainer>
             </Content>
@@ -86,4 +86,4 @@ const SignIn = () => {
         </Container>
     );
 }
-export default SignIn;
+export default ForgotPassword;

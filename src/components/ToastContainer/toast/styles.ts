@@ -18,7 +18,7 @@ const ToastVariations = {
 
 interface ToastProps{
     type: "success" | "danger" | "info",
-    hasDescription?: boolean;
+    hasDescription?: Number;
 }
 
 

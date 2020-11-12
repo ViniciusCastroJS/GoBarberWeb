@@ -29,7 +29,7 @@ export const Toast: React.FC<ToastProps> = ({toast, style}) => {
     }, [removeToast, toast.id])
 
     return (
-    <Container style={style} type={toast.type} hasDescription={!!toast.description}>
+    <Container style={style} type={toast.type} hasDescription={Number(!!toast.description)}>
         {icons[toast.type]}
         <div>
             <strong>{toast.title}</strong>
